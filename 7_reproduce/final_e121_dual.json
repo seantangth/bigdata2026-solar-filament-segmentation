@@ -1,0 +1,38 @@
+{
+  "name": "E-121-Pure-DualScale-TopoFlowNet-10M",
+  "about": "100% Pure Dual-Scale TopoFlowNet System (10 models = 5x E-120 Global/Equivariant TopoFlowNet + 5x E-121a Native-512 Snake-TopoFlowNet): 5-ch single-image solar physics frontend + parallel native stride-1/1 fine stem + GroupNorm Dynamic Snake Convolutions + Annotator Granularity FiLM + 5-ch Topological Spine-Flow fields + Geodesic Euler integration + Exact Conflict-Graph Lagrangian MWIS/MBR solver.",
+  "n_test_images": 180,
+  "folds": [0, 1, 2, 3, 4],
+  "output_filename": "sub_e121_pure_dual_mbr_10m_5f.csv",
+  "models": [
+    {"name": "exp120_topoflow_f0", "family": "e120_global_equiv", "fold": 0},
+    {"name": "exp120_topoflow_f1", "family": "e120_global_equiv", "fold": 1},
+    {"name": "exp120_topoflow_f2", "family": "e120_global_equiv", "fold": 2},
+    {"name": "exp120_topoflow_f3", "family": "e120_global_equiv", "fold": 3},
+    {"name": "exp120_topoflow_f4", "family": "e120_global_equiv", "fold": 4},
+    {"name": "exp121_snake512_f0", "family": "e121_snake_native512", "fold": 0},
+    {"name": "exp121_snake512_f1", "family": "e121_snake_native512", "fold": 1},
+    {"name": "exp121_snake512_f2", "family": "e121_snake_native512", "fold": 2},
+    {"name": "exp121_snake512_f3", "family": "e121_snake_native512", "fold": 3},
+    {"name": "exp121_snake512_f4", "family": "e121_snake_native512", "fold": 4}
+  ],
+  "solver_config": {
+    "cal_e120": {"t_body": 0.42, "gate": 0.86, "fpc": 1.00},
+    "cal_e121": {"t_body": 0.42, "gate": 0.92, "fpc": 1.50},
+    "dual_mbr": {
+      "w121": 0.50,
+      "tb": 0.43,
+      "gate": 0.90,
+      "fpc_field": 1.00,
+      "fpc_mbr": 1.00,
+      "w_ref_dual": 0.55,
+      "w_ref_121": 0.20,
+      "w_ref_120": 0.25
+    }
+  },
+  "expected": {
+    "sha256": "28ebcf822354fb490f4a9412ad4492147deedac1367c44e4193bdc8c8ebd8a03",
+    "n_rows": 1157,
+    "n_images_with_rows": 178
+  }
+}

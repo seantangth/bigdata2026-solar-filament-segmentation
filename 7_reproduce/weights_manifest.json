@@ -1,0 +1,91 @@
+{
+  "description": "Checkpoints of the final submission (Kaggle 58267599, sub_e121_pure_dual_mbr_10m_5f.csv): 5 Global-1024 TopoFlowNet (E-120) + 5 Native-512 Snake-TopoFlowNet (E-121a), one per CV-A fold; used by 7_reproduce/run_e121_dual_final.py with 7_reproduce/final_e121_dual.json. Layout expected by --weights: <WEIGHTS>/<name>/best.pt. Each checkpoint is published as release asset <name>.pt; 7_reproduce/download_weights.py restores the <name>/best.pt layout and checks exact byte size and MD5.",
+  "release": {
+    "repo": "seantangth/bigdata2026-solar-filament-segmentation",
+    "tag": "weights-v1",
+    "base_url": "https://github.com/seantangth/bigdata2026-solar-filament-segmentation/releases/download/weights-v1"
+  },
+  "total_bytes": 4028246780,
+  "checkpoints": [
+    {
+      "name": "exp120_topoflow_f0",
+      "file": "exp120_topoflow_f0/best.pt",
+      "asset": "exp120_topoflow_f0.pt",
+      "size": 398622397,
+      "md5": "ba05a3b58c4e43e5236b3b9d565da95e",
+      "role": "Pure Dual-Scale TopoFlowNet: Global-1024 E-120 fold 0"
+    },
+    {
+      "name": "exp120_topoflow_f1",
+      "file": "exp120_topoflow_f1/best.pt",
+      "asset": "exp120_topoflow_f1.pt",
+      "size": 398622397,
+      "md5": "916958203d4dd8918af3f1efb6e63d9b",
+      "role": "Pure Dual-Scale TopoFlowNet: Global-1024 E-120 fold 1"
+    },
+    {
+      "name": "exp120_topoflow_f2",
+      "file": "exp120_topoflow_f2/best.pt",
+      "asset": "exp120_topoflow_f2.pt",
+      "size": 398622397,
+      "md5": "c4e0cc90e5eb0a5e50049050e9b9f3fc",
+      "role": "Pure Dual-Scale TopoFlowNet: Global-1024 E-120 fold 2"
+    },
+    {
+      "name": "exp120_topoflow_f3",
+      "file": "exp120_topoflow_f3/best.pt",
+      "asset": "exp120_topoflow_f3.pt",
+      "size": 398622397,
+      "md5": "8fa4c2b26bf1fe3ea8571c052bcc99b2",
+      "role": "Pure Dual-Scale TopoFlowNet: Global-1024 E-120 fold 3"
+    },
+    {
+      "name": "exp120_topoflow_f4",
+      "file": "exp120_topoflow_f4/best.pt",
+      "asset": "exp120_topoflow_f4.pt",
+      "size": 398622397,
+      "md5": "ac238f0bf900fdf5d5737a2bd2fdaa71",
+      "role": "Pure Dual-Scale TopoFlowNet: Global-1024 E-120 fold 4"
+    },
+    {
+      "name": "exp121_snake512_f0",
+      "file": "exp121_snake512_f0/best.pt",
+      "asset": "exp121_snake512_f0.pt",
+      "size": 407026959,
+      "md5": "d47925e879caf977b1076ff37d22852d",
+      "role": "Pure Dual-Scale TopoFlowNet: Native-512 Snake E-121a fold 0"
+    },
+    {
+      "name": "exp121_snake512_f1",
+      "file": "exp121_snake512_f1/best.pt",
+      "asset": "exp121_snake512_f1.pt",
+      "size": 407026959,
+      "md5": "12001b51fa01718d9daf1895f15fbe51",
+      "role": "Pure Dual-Scale TopoFlowNet: Native-512 Snake E-121a fold 1"
+    },
+    {
+      "name": "exp121_snake512_f2",
+      "file": "exp121_snake512_f2/best.pt",
+      "asset": "exp121_snake512_f2.pt",
+      "size": 407026959,
+      "md5": "8a20040cc38ffab3b39c4b94a22b68a6",
+      "role": "Pure Dual-Scale TopoFlowNet: Native-512 Snake E-121a fold 2"
+    },
+    {
+      "name": "exp121_snake512_f3",
+      "file": "exp121_snake512_f3/best.pt",
+      "asset": "exp121_snake512_f3.pt",
+      "size": 407026959,
+      "md5": "e77fff10d0a04efa36991a55408f8aa9",
+      "role": "Pure Dual-Scale TopoFlowNet: Native-512 Snake E-121a fold 3"
+    },
+    {
+      "name": "exp121_snake512_f4",
+      "file": "exp121_snake512_f4/best.pt",
+      "asset": "exp121_snake512_f4.pt",
+      "size": 407026959,
+      "md5": "d7ca909d92f0de22dde9bdb7ab7a2d33",
+      "role": "Pure Dual-Scale TopoFlowNet: Native-512 Snake E-121a fold 4"
+    }
+  ]
+}

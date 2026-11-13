@@ -1,0 +1,9 @@
+# data, weights and outputs are not part of the repository (README: Reproducing the submissions)
+1_data/
+4_models/
+5_outputs/
+runs/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
