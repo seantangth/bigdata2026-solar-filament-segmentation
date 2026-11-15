@@ -3,7 +3,7 @@
 Instance segmentation of solar filaments in full-disk GONG H-alpha observations (IEEE BigData Cup 2026,
 [Kaggle: filament-segmentation-2026](https://www.kaggle.com/competitions/filament-segmentation-2026)).
 
-One command reproduces our primary **100% Pure 10-Model Dual-Scale `TopoFlowNet`** submission (`sub_e121_pure_dual_mbr_10m_5f.csv`, Public LB **0.40**) directly from the 180 test images and 10 MD5-verified checkpoints:
+One command reproduces our final **10-model Pure Dual-Scale `TopoFlowNet`** submission (`sub_e121_pure_dual_mbr_10m_5f.csv`, Public LB **0.40**) directly from the 180 test images and 10 MD5-verified checkpoints:
 
 ```bash
 python 7_reproduce/run_e121_dual_final.py \
@@ -24,7 +24,7 @@ Comparisons with our earlier U-Net baselines and a 20-model cross-family hybrid 
 ### Key Scientific Findings
 
 - **PQ & CV-A Evaluation Protocol**: Official Panoptic Quality (`IoU > 0.5`, pooled across all 1,154 observer–image rows on 707 training images). `CV-A` (`1_data/processed/folds_cvA_v1.csv`) is a 5-fold `GroupKFold` grouped by image stem and stratified by `(observer count × GONG station)`. All Pure Dual-Scale `TopoFlowNet` fusion and MWIS hyperparameters are evaluated via **strict nested 5-fold cross-fitting** (fit on 4 training folds, score on the held-out fold).
-- **Multi-Annotator Uncertainty**: Across all 1,196 ordered observer pairs on the 296 multi-annotator training images, human-vs.-human PQ is **0.340** (`SQ = 0.634`, `RQ = 0.537`, median best-match `IoU = 0.517`, `17.8%` zero-overlap misses). Under the exact PQ differential, retaining a candidate matched by $k$ of $n$ observers with mean overlap $\bar{\imath}$ improves global PQ iff $\mathbb{E}[(k/n)\bar{\imath}] > \mathrm{PQ}/2 \approx 0.23$.
+- **Multi-Annotator Uncertainty**: Across all 1,196 ordered observer pairs on the 296 multi-annotator training images, human-vs.-human PQ is **0.340** (`SQ = 0.634`, `RQ = 0.537`, median best-match `IoU ≈ 0.52`, `17.8%` zero-overlap misses). Under the exact PQ differential, retaining a candidate matched by $k$ of $n$ observers with mean overlap $\bar{\imath}$ improves global PQ iff $\mathbb{E}[(k/n)\bar{\imath}] > \mathrm{PQ}/2 \approx 0.23$.
 - **Dual-Scale Complementarity & Native Barb Fidelity**: Whole-disk `E-120` excels on dense active-belt multi-observer scenes (`PQ = 0.4621`), whereas native-resolution `E-121a` gains **`+0.0071` PQ** on single-observer thin peripheral filaments (`0.4558` vs. `0.4487`) and raises matched `mDice` to `0.7369`. Combining all 10 pure models advances nested OOF PQ by **`+0.0053`** (`95% CI [+0.0014, +0.0091]`, `p = 0.0035`) and Public LB from **0.39** to **0.40**. On 1,253 common-TP filaments across 120 multi-annotator images, Pure Dual-Scale `TopoFlowNet` cuts inter-filament false merges (`n:1`) by **33.9%** (`156` vs. `236` on all 707 images) and raises natural skeleton branch density by **67.7%** (`2.61` vs. `1.56` branch points / 100 px; Multiscale IoU `0.840` vs. `0.837`; thin-structure recall `0.618` vs. `0.597`, exceeding human second-observer recall `0.586`) with **zero morphological post-dilation**.
 
 ## Pure Dual-Scale `TopoFlowNet` Pipeline
@@ -35,16 +35,18 @@ Single GONG H-alpha image (2048×2048)
  │      solar-limb circle fit (cx, cy, R_sun) + valid disk mask (r <= R_sun + 8 px)
  │      [I_norm, radial quiet-Sun ΔI_QS(r), limb-mirrored ΔI_loc, multi-scale Hessian ridge, μ = sqrt(1 - (r/R_sun)^2)]
  ├─ 2. 10 Pure TopoFlowNet checkpoints (5 folds × 2 complementary scales)            sfsc/topoflow_net.py
- │      ├─ 5 × Global-1024 TopoFlowNet (E-120): ConvNeXt-B + parallel stride-1/1 fine stem + Annotator FiLM (z_a = 0)
- │      └─ 5 × Native-512 Snake-TopoFlowNet (E-121a): + GroupNorm Dynamic Snake Convs (1/16..1/4) + 1×7/7×1 BarbStrip
- │      each inferred across 8 exact D4 views (inverting vector sign & permutation on (vx, vy))
+ │      ├─ 5 × Global-1024 TopoFlowNet (E-120): ConvNeXt-B + parallel stride-1 fine stem + Annotator FiLM
+ │      └─ 5 × Native-512 Snake-TopoFlowNet (E-121a): + GroupNorm Dynamic Snake Convs (1/16..1/4) + 1×7/7×1 BarbStrip (1/2 decoder)
+ │      FiLM heads averaged over a consensus token + top training-annotator tokens at test time
+ │      TTA: E-120 = 2048 six-view rot/flip + 768-px windows + 1024 four-view (0.45/0.35/0.20);
+ │           E-121a = 2048 exact D4 eight-view + 512-px windows (0.65/0.35)
  ├─ 3. Continuous 5-channel topological spine-flow field                             sfsc/topoflow_targets.py
  │      Body B ∈ [0,1], Medial Spine S ∈ [0,1], Instance Separator E ∈ [0,1], Geodesic Flow v = -∇d_G(x, S_i) ∈ [-1,1]^2
  ├─ 4. Dual-scale field fusion + damped Euler streamline basin tracking              scripts/e121_dual_ensemble.py
- │      12 Euler steps x_{k+1} = x_k + Δs v(x_k) into separator-gated spine cores C = B · (1 - α E)
+ │      separator-gated seed cores; blobs with >=2 seeds split by 22 damped Euler steps x_{k+1} = x_k + Δs v(x_k)
  └─ 5. Exact conflict-graph MWIS / PQ-MBR solver                                     sfsc/topoflow_targets.py
-        expected-PQ marginal utility u_i = Σ w_r max IoU(C_i, g) - τ on the IoU ≥ 0.5 conflict graph
-        exact branch-and-bound per connected component → pixel-disjoint RLE submission
+        expected-PQ utility u_i = Σ_r w_r φ(max_g IoU(C_i, g)), φ(m) = m − τ/2 if m > 0.5 else −τ/2 (τ = 0.47)
+        conflict graph = any pixel overlap; exact branch-and-bound per component → pixel-disjoint RLE submission
 ```
 
 Every submission is verified for strict pixel disjointness, unique instance IDs, and valid COCO RLE (`3_src/sfsc/submission.py`). Inference uses strictly the single test image at a time (no temporal neighbors, no magnetograms, no external test data).
@@ -77,14 +79,14 @@ Every submission is verified for strict pixel disjointness, unique instance IDs,
        --test-images 1_data/raw/MAGFiLO_1.0_Kaggle_2026/test/test_images \
        --weights 4_models --work runs/e121_smoke --dry-run
 
-   # Byte-exact CPU verification from pre-saved topological maps (SHA256 = 28ebcf822354fb49...):
+   # Byte-exact CPU verification from our stored topological maps (not included in this repository; SHA256 = 28ebcf822354fb49...):
    python 7_reproduce/run_e121_dual_final.py \
        --test-images 1_data/raw/MAGFiLO_1.0_Kaggle_2026/test/test_images \
        --e120-maps 5_outputs/exp120_topoflow --e121-maps 5_outputs/exp121_snake512 \
        --geometry 1_data/processed/disk_geometry_v1.csv --work runs/e121_verify --verify
    ```
 5. **Self-Contained End-to-End Notebook**:
-   - `2_notebooks/SFSC_06_topoflow_dual_pipeline.ipynb` walks through the complete Pure Dual-Scale `TopoFlowNet` system end to end: environment check, automated weight verification, single-image 5-channel solar physics visualization, `TRAIN_FROM_SCRATCH` toggle vs. pretrained loading, topological spine-flow inference + exact MWIS decoding, 6-panel qualitative overlay, and official PQ + Rubric evaluation (`SFSC_NB_DRY_RUN=1` runs in `25 s` on 1× A100 or `~32 s` on CPU; `SFSC_NB_DRY_RUN=0` runs all 10 models on all 180 test images).
+   - `2_notebooks/SFSC_06_topoflow_dual_pipeline.ipynb` walks through the complete Pure Dual-Scale `TopoFlowNet` system end to end: environment check, automated weight verification, single-image 5-channel solar physics visualization, `TRAIN_FROM_SCRATCH` toggle vs. pretrained loading, topological spine-flow inference + exact MWIS decoding, 6-panel qualitative overlay, and official PQ + Rubric evaluation (`SFSC_NB_DRY_RUN=1` runs in `25 s` on 1× A100 or `~32 s` on CPU; `SFSC_NB_DRY_RUN=0` runs all 10 models on all 180 test images, ~115 min on 1× A100).
 
 **Determinism & Clean-Machine Verified Runtime**:
 - From stored topological field maps (`--e120-maps` / `--e121-maps`), the CPU fusion + Euler + MWIS solver regenerates `sub_e121_pure_dual_mbr_10m_5f.csv` (`1,157` disjoint instances across `178/180` test images, `SHA256 = 28ebcf822354fb490f4a9412ad4492147deedac1367c44e4193bdc8c8ebd8a03`) **byte for byte** in `144.1 s` (`0.80 s/image` on 8 Apple M4 cores; `132.1 s` / `0.73 s/image` on clean Linux x86_64).
@@ -143,4 +145,4 @@ python 3_src/scripts/e121_dual_ensemble.py \
 
 ## License and Acknowledgements
 
-Code: MIT License (`LICENSE`). Third-party libraries: `timm` (Apache-2.0), PyTorch (BSD-3-Clause). Data: MAGFiLO (Kaggle 2026 competition split; no external data or MAGFiLO Dataverse archive used in deployed models) — please cite Ahmadzadeh et al., *Scientific Data* 11, 1029 (2024), https://doi.org/10.1038/s41597-024-03876-y.
+Code: MIT License (`LICENSE`). Third-party libraries: `timm` (Apache-2.0), PyTorch (BSD-3-Clause). Data: MAGFiLO (Kaggle 2026 competition split; no external data or MAGFiLO Dataverse archive used in deployed models) — please cite Ahmadzadeh et al., *Scientific Data* 11, 1031 (2024), https://doi.org/10.1038/s41597-024-03876-y.
